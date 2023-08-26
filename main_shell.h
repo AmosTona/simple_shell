@@ -5,26 +5,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> /*mainly for parsing */
-
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/wait.h>
+#include <stddef.h>
+extern char **environ;
 /**
- *struct passinfo - contains pseudo-arguements to pass into a function,
- *allowing uniform prototype for function pointer struct
- *@arg: a string generated from getline containing arguements
- *@argv: an array of strings generated from arg
- *@path: a string path for the current command
- *@argc: the argument count
- *@line_count: the error count
- *@err_num: the error code for exit()s
- *@linecount_flag: if on count this line of input
- *@fname: the program filename
- *@env: linked list local copy of environ
- *@environ: custom modified copy of environ from LL env
- *@history: the history node
- *@alias: the alias node
- *env_changed: on if environ was changed
- *@status: the return status of the last exec'd command
- *@cmd_buf: address of pointer to cmd_buf, on if chaining
- *@cmd_buf_type: CMD_type ||, &&, ;
- *@readfd: the fd from which to read line input
- *@histcount: the history line number count
+ *struct builtins_s - a struct that points to the string in
+ *an array a struct
+ *@command: a variable that points to the string in my array of
+ *structs
+ *@ptr: a variable that is a function pointer that takes in a char **
+ *as an argument
  */
+typedef struct builtins_s{
+	char *command;
+	void (*ptr)(char **);
+}builtins_f;
+char *_getenv(const char *name);
+char *_strdup(char *str);
+char **_createToken(char *user_input);
+char *_strstr(char *haystack, char *needle);
+int checking_built(char **arr);
+void ex_it(char **arr);
+int checking_built(char **arr);
+void _createChild_P(char **arrayStr, char **_getPATH_res);
+char **_getPATH(char *str, char **tok_UsInput);
+char *_strcpy(char *dest, char *src);
+char *_strcat(char *dest, char *src);
+void environment(char **arr);
+char *_memset(char *s, char b, unsigned int n);
+void _createChild(char **arrayStr);
+#endif

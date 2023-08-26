@@ -1,32 +1,46 @@
 #include "main_shell.h"
 
 /**
- * main
- * return 0
+ *main - a function that prompts the user for input to run shell commands
+ *Return: The function will return 0 on success
  */
-
-int main(int ac, char **argv)
+int main(void)
 {
-	/*this is tge commqnd to print the  $ prompt at the begginning of each line */
-	char *prompt = "(Eshell) $ ";
-	char *lineptr; /*for the getline */
-	size_t n = 0;
-	ssize_t nchars_read;
-	/* an infinite loop to make sure the prompt is displayed continuously  */
-	while(2);
-       	{
-	printf("%s", prompt);
-	
-	nchars_read = getline(&lineptr, &n, stdin);
-      /* check if the getline function failed or reached EOF or user use CTRL + D */
-        if (nchars_read == -1)
+	char *user_input, **arrayStr, *env_result, **_getPATH_res;
+	size_t len; int i, a;
+
+	len = i = a = 0; user_input = NULL;
+	arrayStr = malloc(sizeof(char *) * 800);
+	if (arrayStr == NULL)
+		exit(1);
+	write(STDOUT_FILENO, "$ ", 2);
+	while (getline(&user_input, &len, stdin) != -1)
 	{
-            printf("Exiting shell....\n");
-            return (-1);
-	free(lineptr);
+		if (user_input[0] != '\n' && user_input[0] != '#')
+		{
+			arrayStr = _createToken(user_input);
+			if (checking_built(arrayStr) == 1)
+			{
+				if (_strstr(arrayStr[0], "/") != NULL)
+				{
+					_createChild(arrayStr);
+					write(STDOUT_FILENO, "$ ", 2);
+				}
+				else
+				{
+					env_result = _getenv("PATH");
+					_getPATH_res =
+						_getPATH(env_result, arrayStr);
+					_createChild_P(arrayStr, _getPATH_res);
+					write(STDOUT_FILENO, "$ ", 2);
+				}
+			}
+			else
+				write(STDOUT_FILENO, "$ ", 2);
+			free(arrayStr);
+		}
+		else
+			write(STDOUT_FILENO, "$ ", 2);
 	}
-
 	return (0);
-
-	}
-}	
+}
