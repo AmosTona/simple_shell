@@ -1,83 +1,44 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "main_shell.h"
 
 /**
- * return 0
- * main_shell.c prints the $ prompt
+ * main - entry point
+ * @ac: arg count
+ * @av: arg vector
+ *
+ * Return: 0 on success, 1 on error
  */
-
-#define MAX_INPUT_SIZE 1024
-#define MAX_TOKEN_SIZE 64
-#define MAX_NUM_TOKENS 64
-/*splits the input string into tokens*/
-char **tokenize (char *input)
+int main(int ac, char **av)
 {
-	char **tokens = malloc(MAX_NUM_TOKENS *sizeof(char*));
-	char *token = strok(input, "\n\t");
-	int i = 0;
+	info_t info[] = { INFO_INIT };
+	int fd = 2;
 
-	while (token !=NULL)
+	asm ("mov %1, %0\n\t"
+		"add $3, %0"
+		: "=r" (fd)
+		: "r" (fd));
+
+	if (ac == 2)
 	{
-		tokens [i] = token;
-		i++;
-		token = strok (NULL, "\n\t");
+		fd = open(av[1], O_RDONLY);
+		if (fd == -1)
+		{
+			if (errno == EACCES)
+				exit(126);
+			if (errno == ENOENT)
+			{
+				_eputs(av[0]);
+				_eputs(": 0: Can't open ");
+				_eputs(av[1]);
+				_eputchar('\n');
+				_eputchar(BUF_FLUSH);
+				exit(127);
+			}
+			return (EXIT_FAILURE);
+		}
+		info->readfd = fd;
 	}
-	tokens [i] = NULL;
-	return tokens;
-}
-
-/*executes builtin commands*/
-void exec_builtin (char **tokens)
-{
-	if (strcmp (tokens [0], "quit")==0)
-	{
-		exit (0);
-	}
-	elseif (strcmp(tokens [0], "help")==0)
-	{
-		printf ("Supported commands:\n");
-		printf ("quit -exit the shell \n");
-		printf ("help - Display this menu\n");
-	}
-}
-
-
-
-/* executes non_builtin commands using fork()*/
-Void exec.external (char **tokens)
-{
-	pid.t pid = fork();
-
-	if (pid ==0)
-	{
-		execvp (tokens [0], tokens);
-		printf ("command not found \n");
-		exit 1;
-	}
-	wait (NULL);
-}
-
-int main (int argc, char*argv[]);
-{
-	char input [MAX_INPUT_SIZE];
-	char **tokens;
-
-	while (TRUE);
-	{
-		/*print prompt*/
-		printf ("$");
-
-		/*get input*/
-		fgets(input, MAX_INPUT_SIZE, stdin);
-
-		/*tokenize input*/
-		tokens = tokenize (input);
-
-		/*excecute built in commands*/
-		exec_builtin (tokens);
-
-		/*execute external commands*/
-		exec_external (tokens);
-	}
+	populate_env_list(info);
+	read_history(info);
+	hsh(info, av);
+	return (EXIT_SUCCESS);
 }
